@@ -1,0 +1,91 @@
+*{
+    border-style: solid;
+}
+body{
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+   
+    min-height: 100vh;
+}
+#head{
+    min-height: 20vh;
+    display: flex;
+    justify-content: space-around;
+    background-color:rgb(121, 174, 223);
+    align-items: center;
+}
+#head>span{
+    color: yellow;
+    font-size: 3rem;
+    font-style:oblique;
+    font-weight: 900;
+}
+#left-bar-and-main-container{
+display: flex;
+min-height: 80vh;
+}
+#left-bar{
+width:30%;
+display: flex;
+flex-direction: column;
+gap: 1vh;
+background-color: rgb(250, 115, 115);
+
+}
+#main-fild{
+    width: 70%;
+    background-color: rgba(240, 190, 26,0.1 )
+
+}
+
+/* dynamic element styling */
+.project-name-form{
+    display:none;
+}
+
+.todo-form{
+    position:fixed;
+    z-index: 1;
+    width: 60%;
+    height: 60%;
+    top:200px;
+    left: 30%;
+    right: 30%;
+    background-color:white;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+    /* display: none; */
+}
+.todo-form>div{
+    display: flex;
+    
+
+}
+.form-disapper{
+    display: none;
+}
+
+
+
+/* todocontainer */
+.todolistContainer{
+    display: flex;
+}
+
+/* todofullinfo */
+.todo-full-info{
+
+    min-height:15vh;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.todo-full-info-items{
+    display: flex;
+}
+.todo-full-info-items>div{
+    width: 50%;
+}
