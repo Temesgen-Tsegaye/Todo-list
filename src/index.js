@@ -1,5 +1,9 @@
 import "./style.css";
-import { differenceInCalendarQuarters, differenceInDays, format } from "date-fns";
+import {
+  differenceInCalendarQuarters,
+  differenceInDays,
+  format,
+} from "date-fns";
 
 const projecttab = document.getElementById("project");
 const leftBar = document.getElementById("left-bar");
@@ -11,6 +15,15 @@ const todoFormCreater = document.getElementById("pop-todo-form");
 var mainFild = document.getElementById("main-fild");
 const today = document.getElementById("today");
 const month = document.getElementById("month");
+//
+// const LOCAL_STORAGE_ARRAY_KEY = "toDoArr";
+// JSON.parse(localStorage.getItem(LOCAL_STORAGE_ARRAY_KEY)) ||
+var todoArray = [];
+
+// function updateLocalStorage() {
+//   localStorage.setItem(LOCAL_STORAGE_ARRAY_KEY, JSON.stringify(todoArray));
+// }
+// updateLocalStorage();
 
 leftBar.appendChild(projectNameForm);
 projectNameForm.appendChild(inputForProject);
@@ -28,6 +41,7 @@ addProject.addEventListener("click", function () {
   projectNameForm.insertAdjacentElement("afterend", listOfProject);
 
   listOfProject.dataset.project = "yes";
+  listOfProject.dataset.clickedRecently ="";
   listOfProject.textContent = inputForProject.value;
   inputForProject.value = "";
   projectNameForm.classList.add("project-name-form");
@@ -137,32 +151,34 @@ function optionGenarator() {
 }
 
 todoFormCreater.addEventListener("click", optionGenarator);
-var todoArray = [];
+todoFormCreater.addEventListener("click", todoArryCreater);
+
 //create todolist arr
 function todoArryCreater() {
-  document.body.addEventListener("click", function (e) {
-    let input = document.getElementById("title-input");
-    let description = document.getElementById("discription-fild");
-    let periority = document.getElementById("priority-select");
-    let date = document.getElementById("date-fild");
-    let project = document.getElementById("project-select");
+  let input = document.getElementById("title-input");
+  let description = document.getElementById("discription-fild");
+  let periority = document.getElementById("priority-select");
+  let date = document.getElementById("date-fild");
+  let project = document.getElementById("project-select");
+  let addTodo = document.getElementById("add-Todo");
 
-    if (e.target.textContent == "add Todo") {
-      var todoobject = new todoObj(
-        input.value,
-        description.value,
-        periority.value,
-        date.value,
-        project.value
-      );
-      todoArray.push(todoobject);
+  addTodo.addEventListener("click", function () {
+    var todoobject = new todoObj(
+      input.value,
+      description.value,
+      periority.value,
+      date.value,
+      project.value
+    );
+  
+    todoArray.push(todoobject);
+    bb(todoobject)
+    
+    // updateLocalStorage();
 
-      e.target.parentElement.remove();
-    }
+    addTodo.parentElement.remove();
   });
 }
-
-todoArryCreater();
 
 function todoObj(title, description, priority, date, project) {
   this.title = title;
@@ -173,13 +189,46 @@ function todoObj(title, description, priority, date, project) {
 }
 
 leftBar.addEventListener("click", function (e) {
+  var AllTabs=document.querySelectorAll('[data-clicked-recently]')
+
+  AllTabs.forEach(element => {
+    if(element==e.target){
+     e.target.dataset.clickedRecently='true'
+    }
+    else{
+      element.dataset.clickedRecently='false'
+    }
+    
+  });
+
   if (e.target.hasAttribute("data-project")) {
-    var filteredA = todoArray.filter(function (t) {
+    
+    let filteredA = todoArray.filter(function (t) {
       if (e.target.textContent == t.project) {
         return true;
       }
     });
     createtodocontainer(filteredA);
+  } else if (e.target.hasAttribute("data-today")) {
+    console.log("x");
+    let curretDateTask = todoArray.filter(function (item) {
+      let diffenceindate = differenceInDays(new Date(item.date), new Date());
+      if (diffenceindate == 0) {
+        return true;
+      }
+    });
+    createtodocontainer(curretDateTask);
+  } else if (e.target.hasAttribute("data-month")) {
+   
+  
+      let curretMonthTask = todoArray.filter(function (item) {
+        let diffenceindate = differenceInDays(new Date(item.date), new Date());
+        if (diffenceindate <= 30 && diffenceindate >= 0) {
+          return true;
+        }
+      });
+      createtodocontainer(curretMonthTask);
+    
   }
 });
 
@@ -187,244 +236,129 @@ function createtodocontainer(filtred) {
   mainFild.innerHTML = "";
 
   filtred.forEach((element) => {
-    const toContainer = document.createElement("div");
-    const titleConainer = document.createElement("div");
-    const checkBox = document.createElement("input");
-    checkBox.type = "checkbox";
-    const deleteButton = document.createElement("button");
-    mainFild.appendChild(toContainer);
-    toContainer.classList.add("todolistContainer");
-    toContainer.appendChild(checkBox);
-    toContainer.appendChild(titleConainer);
-    toContainer.appendChild(deleteButton);
+   appendtodoDom(element);
+  });
+}
+function appendtodoDom(element){
+  
+  const toContainer = document.createElement("div");
+  const TOP=document.createElement('div')
+  
+  const titleConainer = document.createElement("div");
+  const checkBox = document.createElement("input");
+  const MORE=document.createElement('button')
+  checkBox.type = "checkbox";
+  const deleteButton = document.createElement("button");
+  mainFild.appendChild(toContainer);
+  toContainer.classList.add("todolistContainer");
+  toContainer.appendChild(TOP)
+  TOP.appendChild(checkBox)
+  TOP.appendChild(titleConainer)
+  TOP.appendChild(MORE)
+  TOP.appendChild(deleteButton)
+  TOP.classList.add('top')
+  
+  //
+  
+  
 
-    //
-    const fullinfo = document.createElement("div");
-    const fullinfotitle = document.createElement("div");
-    const fullinfoDate = document.createElement("div");
-    const title_date = document.createElement("div");
-    const fullinfoperiority = document.createElement("div");
-    const fullinfoProject = document.createElement("div");
-    const periority_project = document.createElement("div");
-    const fullinfoDescription = document.createElement("div");
-    toContainer.appendChild(fullinfo);
-    fullinfo.classList.add("todo-full-info");
-    fullinfo.appendChild(title_date);
-    title_date.classList.add("todo-full-info-items");
-    title_date.appendChild(fullinfotitle);
-    title_date.appendChild(fullinfoDate);
-    fullinfo.appendChild(periority_project);
-    periority_project.classList.add("todo-full-info-items");
-    periority_project.appendChild(fullinfoperiority);
-    periority_project.appendChild(fullinfoProject);
-    fullinfo.appendChild(fullinfoDescription);
-
-    checkBox.addEventListener("click", function () {
-      const cc = todoArray.findIndex(function (item) {
-        if (element.title == item.title) {
-          return true;
-        }
-      });
-      if (checkBox.checked == true) {
-        todoArray[cc].ch = "n";
-        console.log(todoArray[cc]);
+  //
+  const hiddenContainer = document.createElement("div");
+   toContainer.appendChild(hiddenContainer)
+   hiddenContainer.classList.add('bottom')
+  
+  const PERIORITY=document.createElement('div')
+  const DATE=document.createElement('div')
+  const PROJECT=document.createElement('div')
+  const DESCRIPTION=document.createElement('div')
+  
+  
+  
+  hiddenContainer.appendChild(PERIORITY)
+  hiddenContainer.appendChild(PROJECT)
+ hiddenContainer.appendChild(DATE)
+ hiddenContainer.appendChild(DESCRIPTION)
+  //
+  PERIORITY.textContent=`Periority: ${element.periority}`
+  DATE.textContent=`Date: ${element.date}`
+  PROJECT.textContent=`Project: ${element.project}`
+  DESCRIPTION.textContent=`Description: ${element.description}`
+  checkBox.addEventListener("click", function () {
+    const cc = todoArray.findIndex(function (item) {
+      if (element.title == item.title) {
+        return true;
       }
-      //  && todoArray[cc].hasOwnProperty('ch')
-      if (checkBox.checked == false) {
-        delete todoArray[cc].ch;
-
-        console.log(todoArray[cc]);
-      }
-      //
     });
-    if (element.hasOwnProperty("ch")) {
-      checkBox.checked = true;
-    } else {
-      checkBox.checked = false;
+    if (checkBox.checked == true) {
+      todoArray[cc].ch = "n";
+      // updateLocalStorage();
+    }
+    //  && todoArray[cc].hasOwnProperty('ch')
+    if (checkBox.checked == false && element.hasOwnProperty('ch')) {
+      delete todoArray[cc].ch
+      // updateLocalStorage();
     }
     //
-    deleteButton.addEventListener("click", function (e) {
-      e.target.parentElement.remove();
-      const cc = todoArray.findIndex(function (item) {
-        if (element.title == item.title) {
-          return true;
-        }
-      });
-      delete todoArray[cc];
-    });
-
-    titleConainer.textContent = element.title;
-    deleteButton.textContent = "Delete";
   });
-}
-// filter based on time
-function datebasrdfilter() {
-  today.addEventListener("click", function () {
-    let curretDateTask = todoArray.filter(function (item) {
-      let diffenceindate = differenceInDays(new Date(item.date), new Date());
-      if (diffenceindate == 0) {
+  if (element.hasOwnProperty("ch")) {
+    checkBox.checked = true;
+  } else {
+    checkBox.checked = false;
+  }
+  //
+  deleteButton.addEventListener("click", function (e) {
+    e.target.parentElement.parentElement.remove();
+    const cc = todoArray.findIndex(function (item) {
+      if (element.title == item.title) {
         return true;
       }
-      //
-      mainFild.innerHTML = "";
-
-      curretDateTask.forEach((element) => {
-        const toContainer = document.createElement("div");
-        const titleConainer = document.createElement("div");
-        const checkBox = document.createElement("input");
-        checkBox.type = "checkbox";
-        const deleteButton = document.createElement("button");
-        mainFild.appendChild(toContainer);
-        toContainer.classList.add("todolistContainer");
-        toContainer.appendChild(checkBox);
-        toContainer.appendChild(titleConainer);
-        toContainer.appendChild(deleteButton);
-    
-        //
-        const fullinfo = document.createElement("div");
-        const fullinfotitle = document.createElement("div");
-        const fullinfoDate = document.createElement("div");
-        const title_date = document.createElement("div");
-        const fullinfoperiority = document.createElement("div");
-        const fullinfoProject = document.createElement("div");
-        const periority_project = document.createElement("div");
-        const fullinfoDescription = document.createElement("div");
-        toContainer.appendChild(fullinfo);
-        fullinfo.classList.add("todo-full-info");
-        fullinfo.appendChild(title_date);
-        title_date.classList.add("todo-full-info-items");
-        title_date.appendChild(fullinfotitle);
-        title_date.appendChild(fullinfoDate);
-        fullinfo.appendChild(periority_project);
-        periority_project.classList.add("todo-full-info-items");
-        periority_project.appendChild(fullinfoperiority);
-        periority_project.appendChild(fullinfoProject);
-        fullinfo.appendChild(fullinfoDescription);
-    
-        checkBox.addEventListener("click", function () {
-          const cc = todoArray.findIndex(function (item) {
-            if (element.title == item.title) {
-              return true;
-            }
-          });
-          if (checkBox.checked == true) {
-            todoArray[cc].ch = "n";
-            console.log(todoArray[cc]);
-          }
-          //  && todoArray[cc].hasOwnProperty('ch')
-          if (checkBox.checked == false) {
-            delete todoArray[cc].ch;
-    
-            console.log(todoArray[cc]);
-          }
-          //
-        });
-        if (element.hasOwnProperty("ch")) {
-          checkBox.checked = true;
-        } else {
-          checkBox.checked = false;
-        }
-        //
-        deleteButton.addEventListener("click", function (e) {
-          e.target.parentElement.remove();
-          const cc = todoArray.findIndex(function (item) {
-            if (element.title == item.title) {
-              return true;
-            }
-          });
-          delete todoArray[cc];
-        });
-    
-        titleConainer.textContent = element.title;
-        deleteButton.textContent = "Delete";
-      });
-      //
     });
+   todoArray.splice(cc,1);
+    // updateLocalStorage();
+  });
+  hiddenContainer.classList.add('bottom-toggle')
+  // if(hiddenContainer.hasAttribute('bottom-toggle')){
+  //   hiddenContainer.removeAttribute('bottom-toggle')
+  // }
+  MORE.addEventListener('click',function(){
     
-   
+    hiddenContainer.classList.toggle('bottom-toggle')
+  })
+
+  titleConainer.textContent = element.title;
+  deleteButton.textContent = "Delete";
+
+ }
+
+ //render todo on main fild opend filter(project or time tabs)
+ function bb(element){
+  let diffenceindate = differenceInDays(new Date(element.date), new Date());
   
-  });
-  month.addEventListener("click", function () {
-    let curretMonthTask = todoArray.filter(function (item) {
-      let diffenceindate = differenceInDays(new Date(item.date), new Date());
-      if (diffenceindate<=30 && diffenceindate>=0) {
-        return true;
-      }
-      mainFild.innerHTML = "";
+   var recentlyClicked=document.querySelector('[data-clicked-recently="true"]')
+    
+   if(recentlyClicked.innerHTML=='today' && diffenceindate==0){
+      appendtodoDom(element)
+   }
+   else if(recentlyClicked.innerHTML=='month' && (diffenceindate<=30 && diffenceindate>=0)){
+    // diffenceindate<=30
+     appendtodoDom(element);
+   }
+   else if(recentlyClicked.innerHTML==element.project){
+     appendtodoDom(element)
 
-      curretMonthTask.forEach((element) => {
-        const toContainer = document.createElement("div");
-        const titleConainer = document.createElement("div");
-        const checkBox = document.createElement("input");
-        checkBox.type = "checkbox";
-        const deleteButton = document.createElement("button");
-        mainFild.appendChild(toContainer);
-        toContainer.classList.add("todolistContainer");
-        toContainer.appendChild(checkBox);
-        toContainer.appendChild(titleConainer);
-        toContainer.appendChild(deleteButton);
-    
-        //
-        const fullinfo = document.createElement("div");
-        const fullinfotitle = document.createElement("div");
-        const fullinfoDate = document.createElement("div");
-        const title_date = document.createElement("div");
-        const fullinfoperiority = document.createElement("div");
-        const fullinfoProject = document.createElement("div");
-        const periority_project = document.createElement("div");
-        const fullinfoDescription = document.createElement("div");
-        toContainer.appendChild(fullinfo);
-        fullinfo.classList.add("todo-full-info");
-        fullinfo.appendChild(title_date);
-        title_date.classList.add("todo-full-info-items");
-        title_date.appendChild(fullinfotitle);
-        title_date.appendChild(fullinfoDate);
-        fullinfo.appendChild(periority_project);
-        periority_project.classList.add("todo-full-info-items");
-        periority_project.appendChild(fullinfoperiority);
-        periority_project.appendChild(fullinfoProject);
-        fullinfo.appendChild(fullinfoDescription);
-    
-        checkBox.addEventListener("click", function () {
-          const cc = todoArray.findIndex(function (item) {
-            if (element.title == item.title) {
-              return true;
-            }
-          });
-          if (checkBox.checked == true) {
-            todoArray[cc].ch = "n";
-            console.log(todoArray[cc]);
-          }
-          //  && todoArray[cc].hasOwnProperty('ch')
-          if (checkBox.checked == false) {
-            delete todoArray[cc].ch;
-    
-            console.log(todoArray[cc]);
-          }
+
+   }
+ }
+
+ //updating function
+ function upadate(){
+   //get array index of clicked
+         //adding data attribute that have arry index
+         
+
+   //update arry on  click upadate
+            //update title
+   //change text content of title of dom 
+      //update title
           //
-        });
-        if (element.hasOwnProperty("ch")) {
-          checkBox.checked = true;
-        } else {
-          checkBox.checked = false;
-        }
-        //
-        deleteButton.addEventListener("click", function (e) {
-          e.target.parentElement.remove();
-          const cc = todoArray.findIndex(function (item) {
-            if (element.title == item.title) {
-              return true;
-            }
-          });
-          delete todoArray[cc];
-        });
-    
-        titleConainer.textContent = element.title;
-        deleteButton.textContent = "Delete";
-      });
-    });
-   
-  });
-
-}
-datebasrdfilter();
+ }
